@@ -1,6 +1,5 @@
-#include <errno.h>
-#include <iostream>
+#include <hello.h>
 
 int main() {
-	std::cout << EAGAIN << std::endl;
+	printHello();
 }
