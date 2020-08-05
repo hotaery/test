@@ -50,8 +50,22 @@ public:
     BinaryTree() : node(nullptr) {}
 
     template <typename Iter>
-    BinaryTree(Iter beg, Iter end) {
-
+    BinaryTree(Iter beg, Iter end) : node(nullptr) {
+        typedef std::decav<decltype(*beg)>::type U;
+        if (beg == end) {
+            return;
+        }
+        if (TreeNodeIsNull<U>()(*beg)) {
+            return;
+        }
+        TreeNode* root = new TreeNode(TypeTransform<U, T>()(*beg));
+        node = root;
+        std::queue<TreeNode*> q;
+        q.push(root);
+        ++beg;
+        while (beg != end) {
+            
+        }
     }
 
     ~BinaryTree();
