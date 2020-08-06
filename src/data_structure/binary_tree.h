@@ -64,7 +64,11 @@ public:
         q.push(root);
         ++beg;
         while (beg != end) {
-            
+            TreeNode* curr = q.front();
+            q.pop();
+            if (TreeNodeIsNull<U>()(*beg)) {
+                
+            }
         }
     }
 
