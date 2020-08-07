@@ -15,7 +15,7 @@ struct TreeNode {
     TreeNode* left;
     TreeNode* right;
 
-    TreeNode(T&& v) : val(v), TreeNodeBase() {}
+    TreeNode(T&& v) : val(v), left(nullptr), right(nullptr) {}
 };
 
 template <typename T>
@@ -38,8 +38,9 @@ struct TypeTransform {
         return v;
     }
 
-    U operator()(T&& v, std::enable_if_t<std::is_same_v<T, std::string>, int> = 0, 
-                std::enable_if_t<std::integral_v<U>, int> = 0) {
+
+    typename std::enable_if<std::is_integral<U>::value, U>::type operator()(T&& v, 
+            typename std::enable_if<std::is_same<std::string, T>::value, int>::type = 0) {
         return std::stoi(v);
     }
 };
@@ -51,40 +52,62 @@ public:
 
     template <typename Iter>
     BinaryTree(Iter beg, Iter end) : node(nullptr) {
-        typedef std::decav<decltype(*beg)>::type U;
+        typedef typename std::decay<decltype(*beg)>::type U;
         if (beg == end) {
             return;
         }
         if (TreeNodeIsNull<U>()(*beg)) {
             return;
         }
-        TreeNode* root = new TreeNode(TypeTransform<U, T>()(*beg));
+        TreeNode<T>* root = new TreeNode<T>(TypeTransform<U, T>()(*beg));
         node = root;
-        std::queue<TreeNode*> q;
+        std::queue<TreeNode<T>*> q;
         q.push(root);
         ++beg;
         while (beg != end) {
-            TreeNode* curr = q.front();
+            TreeNode<T>* curr = q.front();
             q.pop();
             if (TreeNodeIsNull<U>()(*beg)) {
-                
+                curr->left = nullptr;
+            } else {
+                curr->left = new TreeNode<T>(TypeTransform<U, T>()(*beg));
+                q.push(curr->left);
             }
+            ++beg;
+            if (TreeNodeIsNull<U>()(*beg)) {
+                curr->right = nullptr;
+            } else {
+                curr->right = new TreeNode<T>(TypeTransform<U, T>()(*beg));
+                q.push(curr->right);
+            }
+            ++beg;
         }
     }
 
-    ~BinaryTree();
+    ~BinaryTree() {
+        _destroy(root);
+    }
 
-    std::string describe() const;
+    std::string describe() const {
 
-    TreeNode* handle() const {
+    }
+
+    TreeNode<T>* handle() const {
         return node;
     }
 
 private:
-    void _destroy();
+    static void _destroy(TreeNode<T>* root) {
+        if (!root) {
+            return;
+        }
+        _destroy(root->left);
+        _destroy(root->right);
+        delete root;
+    }
 
 private:
-    TreeNode* node;
+    TreeNode<T>* node;
 };
 
 } // namespace data_structure
