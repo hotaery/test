@@ -26,21 +26,30 @@ struct TreeNodeIsNull {
 };
 
 template <>
-struct TreeNodeIsNull<std::string> {
+struct TreeNodeIsNull<std::string&> {
     bool operator()(const std::string& s) const {
         return s == "null";
     }
 };
 
-template <typename T, typename U>
-struct TypeTransform {
-    U operator()(T&& v) {
-        return v;
+struct TypeTtoTypeU {
+    template <typename T, typename U>
+    typename std::enable_if<
+        std::is_constructible<U, T>::value,
+    U>::type operator()(T&& v) {
+        return U(v);
     }
 
-
-    typename std::enable_if<std::is_integral<U>::value, U>::type operator()(T&& v, 
-            typename std::enable_if<std::is_same<std::string, T>::value, int>::type = 0) {
+    template <typename T, typename U>
+    typename std::enable_if<std::is_integral<U>::value, U>::type operator()(T&& v,
+        typename std::enable_if<
+            std::is_same<
+                typename std::remove_reference<
+                    typename std::remove_cv<T>::type
+                >::type, 
+                std::string
+            >::value
+        >::type* = 0) {
         return std::stoi(v);
     }
 };
@@ -52,14 +61,14 @@ public:
 
     template <typename Iter>
     BinaryTree(Iter beg, Iter end) : node(nullptr) {
-        typedef typename std::decay<decltype(*beg)>::type U;
+        typedef decltype(*beg) U;
         if (beg == end) {
             return;
         }
         if (TreeNodeIsNull<U>()(*beg)) {
             return;
         }
-        TreeNode<T>* root = new TreeNode<T>(TypeTransform<U, T>()(*beg));
+        TreeNode<T>* root = new TreeNode<T>(TypeTtoTypeU().operator()<U, T>(*beg));
         node = root;
         std::queue<TreeNode<T>*> q;
         q.push(root);
@@ -70,14 +79,17 @@ public:
             if (TreeNodeIsNull<U>()(*beg)) {
                 curr->left = nullptr;
             } else {
-                curr->left = new TreeNode<T>(TypeTransform<U, T>()(*beg));
+                curr->left = new TreeNode<T>(TypeTtoTypeU().operator()<U, T>(*beg));
                 q.push(curr->left);
             }
             ++beg;
+            if (beg == end) {
+                break;
+            }
             if (TreeNodeIsNull<U>()(*beg)) {
                 curr->right = nullptr;
             } else {
-                curr->right = new TreeNode<T>(TypeTransform<U, T>()(*beg));
+                curr->right = new TreeNode<T>(TypeTtoTypeU().operator()<U, T>(*beg));
                 q.push(curr->right);
             }
             ++beg;
@@ -85,11 +97,11 @@ public:
     }
 
     ~BinaryTree() {
-        _destroy(root);
+        _destroy(node);
     }
 
     std::string describe() const {
-
+        return "";
     }
 
     TreeNode<T>* handle() const {
