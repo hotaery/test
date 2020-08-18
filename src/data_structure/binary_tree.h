@@ -122,6 +122,12 @@ private:
     TreeNode<T>* node;
 };
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const BinaryTree<T>& tree) {
+    os << tree.describe();
+    return os;
+}
+
 } // namespace data_structure
 
 #endif // DATA_STRUCTURE_BINARY_TREE_H
