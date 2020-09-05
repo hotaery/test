@@ -5,67 +5,77 @@
 #include <vector>
 #include <iterator>
 #include <string.h>
-#include <bthread/bthread.h>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
-#include <bthread/task_control.h>
-#include <bthread/task_group.h>
-#include <bthread/task_meta.h>
 #include <chrono>
 #include <thread>
 #include <stdarg.h>
 #include <binary_tree.h>
 using namespace std;
 
-typedef data_structure::TreeNode<int> TreeNode;
-
 class Solution {
 public:
-    vector<string> binaryTreePaths(TreeNode* root) {
-        _dfs(root);
-        return ret;
+    string getPermutation(int n, int k) {
+        return _getPermutation(n, k); 
     }
 
 private:
-    vector<string> ret;
-    vector<int> path;
+    typedef vector<int>::iterator Iter;
+    vector<int> _permutatian;
+    vector<int> _fac;
 
-    void _path2str(int last) {
-        string str;
-        str.reserve(path.size() * 3);
-        for (int i = 0; i < path.size(); ++i) {
-            str.append(to_string(path[i]));
-            str.append("->");
+    string _getPermutation(int n, int k) {
+        if (n == 0) {
+            return "";
         }
-        str.append(to_string(last));
-        ret.emplace_back(move(str));
+        _init(n);
+        string ret;
+        ret.reserve(n);
+        if (k >= _fac.back()) {
+            reverse(_permutatian.begin(), _permutatian.end());
+        } else {
+            _getSubPermutation(_permutatian.begin(), _permutatian.end(), k);
+        }
+        transform(_permutatian.begin(), _permutatian.end(), back_inserter(ret), [](int v) {
+            return '0' + v;
+        });
+        return ret;
     }
 
-    void _dfs(TreeNode* node) {
-        if (!node) {
+    void _init(int n) {
+        _permutatian.resize(n);
+        _fac.resize(n);
+        _permutatian[0] = 1;
+        _fac[0] = 1;
+        for (int i = 1; i < n; ++i) {
+            _permutatian[i] = _permutatian[i - 1] + 1;
+            _fac[i] = (i + 1) * _fac[i - 1];
+        }
+    }
+
+    void _getSubPermutation(Iter beg, Iter end, int k) {
+        if (k <= 1) {
             return;
         }
-        if (!node->left && !node->right) {
-            _path2str(node->val);
-            return;
+        int n = distance(beg, end);
+        n -= 1;
+        if (k <= _fac[n - 1]) {
+            return _getSubPermutation(beg + 1, end, k);
+        } 
+        int idx = k / _fac[n - 1];
+        if (k % _fac[n - 1] == 0) {
+            --idx;
         }
-        path.push_back(node->val);
-        _dfs(node->left);
-        _dfs(node->right);
-        path.pop_back();
+        swap(*beg, *(beg + idx));
+        sort(beg + 1, end);
+        return _getSubPermutation(beg + 1, end, k - idx * _fac[n - 1]);
     }
 };
 
 int main() {
-    vector<string> v{"1", "2", "3", "null", "5"};
-    data_structure::BinaryTree<int> tree(v.begin(), v.end());
-    auto ret = Solution().binaryTreePaths(tree.handle());
-    for (auto& path : ret) {
-        cout << path << '\n';
-    }
-    cout << endl;
+    cout << Solution().getPermutation(3, 5) << endl;
 }
