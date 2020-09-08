@@ -11,71 +11,103 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
-#include <chrono>
 #include <thread>
 #include <stdarg.h>
 #include <binary_tree.h>
+#include <output.h>
 using namespace std;
 
 class Solution {
 public:
-    string getPermutation(int n, int k) {
-        return _getPermutation(n, k); 
+    vector<vector<int>> combine(int n, int k) {
+        if (n < k) {
+            return {};
+        }
+        return _combine3(n, k);
     }
 
 private:
-    typedef vector<int>::iterator Iter;
-    vector<int> _permutatian;
-    vector<int> _fac;
+    vector<vector<int>> _ret;
+    vector<int> _curr;
 
-    string _getPermutation(int n, int k) {
-        if (n == 0) {
-            return "";
+    vector<vector<int>> _combine1(int n, int k) {
+        _dfs(1, n, k);
+        return _ret;
+    }
+
+    void _dfs(int left, int right, int k) {
+        if (k == 0) {
+            _ret.push_back(_curr);
+            return;
+        } 
+        if (right - left + 1 < k) {
+            return;
         }
-        _init(n);
-        string ret;
-        ret.reserve(n);
-        if (k >= _fac.back()) {
-            reverse(_permutatian.begin(), _permutatian.end());
-        } else {
-            _getSubPermutation(_permutatian.begin(), _permutatian.end(), k);
+        _curr.push_back(left);
+        _dfs(left + 1, right, k - 1);
+        _curr.pop_back();
+        _dfs(left + 1, right, k);
+    } 
+
+private:
+    //0011 -> 0101 -> 0110 -> 1001 -> 1010 -> 1100
+    vector<vector<int>> _combine2(int n, int k) {
+        vector<vector<int>> ret;
+        vector<int> mask(n, 0);
+        fill(mask.begin(), mask.begin() + k, 1);
+        while (true) {
+            vector<int> v;
+            for (int i = 0; i < n; ++i) {
+                if (mask[i]) {
+                    v.push_back(i + 1);
+                }
+            }
+            ret.push_back(move(v));
+            int idx = 0;
+            for (; idx < n && !mask[idx]; ++idx) {
+            }
+            int one_start = idx;
+            for (; idx < n && mask[idx]; ++idx) {
+            }
+            int one_end = idx;
+            if (idx == n) {
+                break;
+            }
+            mask[idx] = 1;
+            fill(mask.begin() + one_start, mask.begin() + one_end, 0);
+            fill(mask.begin(), mask.begin() + (one_end - one_start - 1), 1);
         }
-        transform(_permutatian.begin(), _permutatian.end(), back_inserter(ret), [](int v) {
-            return '0' + v;
-        });
         return ret;
     }
 
-    void _init(int n) {
-        _permutatian.resize(n);
-        _fac.resize(n);
-        _permutatian[0] = 1;
-        _fac[0] = 1;
-        for (int i = 1; i < n; ++i) {
-            _permutatian[i] = _permutatian[i - 1] + 1;
-            _fac[i] = (i + 1) * _fac[i - 1];
+private:
+    vector<vector<int>> _combine3(int n, int k) {
+        vector<int> v(k, 0);
+        for (int i = 0; i < k; ++i) {
+            v[i] = i + 1;
         }
-    }
-
-    void _getSubPermutation(Iter beg, Iter end, int k) {
-        if (k <= 1) {
-            return;
+        vector<vector<int>> ret;
+        while (true) {
+            ret.push_back(v);
+            if (v.back() == n && v.back() - v.front() == k - 1) {
+                break;
+            }
+            int idx = 1;
+            while (idx < k && v[idx] == v[idx - 1] + 1) {
+                ++idx;
+            }
+            v[idx - 1] += 1;
+            for (int i = 0; i < idx - 1; ++i) {
+                v[i] = i + 1;
+            }
         }
-        int n = distance(beg, end);
-        n -= 1;
-        if (k <= _fac[n - 1]) {
-            return _getSubPermutation(beg + 1, end, k);
-        } 
-        int idx = k / _fac[n - 1];
-        if (k % _fac[n - 1] == 0) {
-            --idx;
-        }
-        swap(*beg, *(beg + idx));
-        sort(beg + 1, end);
-        return _getSubPermutation(beg + 1, end, k - idx * _fac[n - 1]);
+        return ret;
     }
 };
 
 int main() {
-    cout << Solution().getPermutation(3, 5) << endl;
+    {
+        auto ret = Solution().combine(4, 2);
+        utils::operator<<(cout, ret) << endl;
+    }
 }
