@@ -1,39 +1,45 @@
-#include <iostream>
-#include <binary_tree.h>
 #include <vector>
-#include <queue>
-#include <unordered_map>
 #include <unordered_set>
-#include <chrono>
-#include <algorithm>
+#include <iostream>
+#include <queue>
 using namespace std;
 
-typedef data_structure::TreeNode<int> TreeNode;
-
-/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode() : val(0), next(nullptr) {}
- *     ListNode(int x) : val(x), next(nullptr) {}
- *     ListNode(int x, ListNode *next) : val(x), next(next) {}
- * };
- */
-/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
- *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
- *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
- * };
- */
 class Solution {
 public:
-    TreeNode* sortedListToBST(ListNode* head) {
-        
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+        return _combinationSum2(candidates, target); 
+    }
+
+private:
+    vector<vector<int>> _ret;
+    vector<int> _curr;
+    vector<int>* _candidates;
+
+    vector<vector<int>> _combinationSum2(vector<int>& candidates, int target) {
+        _candidates = &candidates;
+        _dfs(0, target);
+        return _ret;
+    }
+
+    void _dfs(int idx, int target) {
+        if (target < 0) {
+            return;
+        }
+        if (target == 0) {
+            _ret.push_back(_curr);
+            return;
+        }
+        if (idx > _candidates->size()) {
+            return;
+        }
+
+        _curr.push_back(_candidates->at(idx));
+        _dfs(idx + 1, target - _candidates->at(idx));
+        _curr.pop_back();
+        _dfs(idx + 1, target);
     }
 };
+
+int main() {
+
+}

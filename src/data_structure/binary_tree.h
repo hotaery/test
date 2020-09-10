@@ -15,7 +15,7 @@ struct TreeNode {
     TreeNode* left;
     TreeNode* right;
 
-    TreeNode(T&& v) : val(v), left(nullptr), right(nullptr) {}
+    TreeNode(T v) : val(v), left(nullptr), right(nullptr) {}
 };
 
 template <typename T>
