@@ -25,6 +25,11 @@ struct ListNode : public ListNodeBase {
     ListNode(T v) : val(v), ListNodeBase() {}
 };
 
+template <typename T>
+class SigleList : public SingleListBase {
+
+};
+
 } // namespace data_structure
 
-#endif 
+#endif // DATA_STRUCTURE_SINGLE_LIST_H
