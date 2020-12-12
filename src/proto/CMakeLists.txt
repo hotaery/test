@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 PROJECT(proto)
 add_definitions(-std=c++11)
+add_definitions(-g)
+add_definitions(-O0)
 FIND_PACKAGE(Protobuf REQUIRED)
 FILE(GLOB protofiles "${CMAKE_CURRENT_SOURCE_DIR}/*.proto")
 include_directories(${CMAKE_INSTALL_PREFIX}/include ${Protobuf_INCLUDE_DIR})

@@ -32,7 +32,6 @@ ExternalProject_Add(
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(DYNAMIC_LIB ${DYNAMIC_LIB}
-        pthread
         "-framework CoreFoundation"
         "-framework CoreGraphics"
         "-framework CoreData"
@@ -44,17 +43,21 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         "-Wl,-U,_ProfilerStop")
 endif()
 
+SET(BRPC_PREFIX /home/daliang/github)
 FILE(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-INCLUDE_DIRECTORIES(/usr/local/include)
-INCLUDE_DIRECTORIES(/Users/daliang/github/incubator-brpc/bld/output/include)
-INCLUDE_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/include)
-LINK_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/lib /usr/local/lib)
-SET(BRPC_LIB /Users/daliang/github/incubator-brpc/bld/output/lib/libbrpc.a)
-SET(LIBS gflags protobuf ssl crypto leveldb)
-ADD_EXECUTABLE(test ${SOURCES})
-ADD_DEPENDENCIES(test data_structure utils proto)
-TARGET_LINK_LIBRARIES(test data_structure.a utils.a proto.a ${BRPC_LIB} ${LIBS} ${DYNAMIC_LIB})
-INSTALL(TARGETS test RUNTIME DESTINATION ../)
+INCLUDE_DIRECTORIES(
+    /usr/include 
+    ${BRPC_PREFIX}/incubator-brpc/bld/output/include 
+    ${CMAKE_INSTALL_PREFIX}/include
+)
+LINK_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/lib /usr/lib/x86_64-linux-gnu)
+SET(BRPC_LIB ${BRPC_PREFIX}/incubator-brpc/bld/output/lib/libbrpc.a)
+message(STATUS "wangziliang ${BRPC_LIB}")
+SET(LIBS pthread gflags protobuf ssl crypto leveldb dl)
+ADD_EXECUTABLE(main ${SOURCES})
+ADD_DEPENDENCIES(main data_structure utils proto)
+TARGET_LINK_LIBRARIES(main data_structure.a utils.a proto.a ${BRPC_LIB} ${LIBS} ${DYNAMIC_LIB})
+INSTALL(TARGETS main RUNTIME DESTINATION ../)
 
 FILE(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/server.cpp)
 ADD_EXECUTABLE(server ${SOURCES})

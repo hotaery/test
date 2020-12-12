@@ -2,3 +2,5 @@ build/
 test
 bin/
 main
+client
+server
